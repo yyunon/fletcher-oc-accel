@@ -18,11 +18,13 @@ FetchContent_Declare(cmake-modules
 )
 FetchContent_MakeAvailable(cmake-modules)
 
-include(CompileUnits)
+FetchContent_Declare(fletcher
+  GIT_REPOSITORY  https://github.com/abs-tudelft/fletcher.git
+  GIT_TAG         develop
+)
+FetchContent_MakeAvailable(fletcher)
 
-if(NOT TARGET fletcher::common)
-  add_subdirectory(../../../common/cpp common)
-endif()
+include(CompileUnits)
 
 add_compile_unit(
   NAME fletcher::snap
