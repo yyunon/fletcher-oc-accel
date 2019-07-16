@@ -18,11 +18,9 @@ FetchContent_Declare(cmake-modules
 )
 FetchContent_MakeAvailable(cmake-modules)
 
-include(CompileUnits)
+add_subdirectory(../fletcher/common/c c)
 
-if(NOT TARGET fletcher::common)
-  add_subdirectory(../../../common/cpp common)
-endif()
+include(CompileUnits)
 
 add_compile_unit(
   NAME fletcher::snap
@@ -32,7 +30,7 @@ add_compile_unit(
   SRCS
     src/fletcher_snap.c
   DEPS
-    fletcher::common
+    fletcher::c
     snap
 )
 

@@ -1,0 +1,33 @@
+resources:
+  repositories:
+  - repository: abs-tudelft
+    type: github
+    endpoint: github
+    name: abs-tudelft/azure-pipelines-templates
+
+variables:
+  arrowVersion: 0.14.0
+  snapVersion: 1.5.1
+  pslseVersion: 4.1
+  pslVersion: 8
+
+jobs:
+
+- job: runtime
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - checkout: self
+    submodules: true
+  - template: steps/install-snap.yml@abs-tudelft
+    parameters:
+      snapVersion: $(snapVersion)
+      pslseVersion: $(pslseVersion)
+      pslVersion: $(pslVersion)
+  - template: steps/install-arrow.yml@abs-tudelft
+    parameters:
+      version: $(arrowVersion)
+  - template: steps/install-cmake.yml@abs-tudelft
+  - template: steps/cmake.yml@abs-tudelft
+    parameters:
+      source: runtime
