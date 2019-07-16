@@ -17,6 +17,8 @@ jobs:
   pool:
     vmImage: ubuntu-latest
   steps:
+  - checkout: self
+    submodules: true
   - template: steps/install-snap.yml@abs-tudelft
     parameters:
       snapVersion: $(snapVersion)

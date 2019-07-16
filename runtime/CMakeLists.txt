@@ -18,11 +18,7 @@ FetchContent_Declare(cmake-modules
 )
 FetchContent_MakeAvailable(cmake-modules)
 
-FetchContent_Declare(fletcher
-  GIT_REPOSITORY  https://github.com/abs-tudelft/fletcher.git
-  GIT_TAG         develop
-)
-FetchContent_MakeAvailable(fletcher)
+add_subdirectory(../fletcher/common/c c)
 
 include(CompileUnits)
 
@@ -34,7 +30,7 @@ add_compile_unit(
   SRCS
     src/fletcher_snap.c
   DEPS
-    fletcher::common
+    fletcher::c
     snap
 )
 
