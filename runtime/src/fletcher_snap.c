@@ -47,11 +47,11 @@ fstatus_t platformInit(void *arg) {
       snap_state.error = 1;
       return FLETCHER_STATUS_ERROR;
     }
-    debug_print("FLETCHER_SNAP] pslse_server.dat present.\n");
+    debug_print("[FLETCHER_SNAP] pslse_server.dat present.\n");
   }
 
   sprintf(snap_state.device, "/dev/cxl/afu%d.0s", snap_state.card_no);
-  
+
   snap_state.card_handle = snap_card_alloc_dev(snap_state.device, SNAP_VENDOR_ID_IBM, SNAP_DEVICE_ID_SNAP);
 
   if (snap_state.card_handle == NULL) {
@@ -82,7 +82,7 @@ fstatus_t platformInit(void *arg) {
   snap_action_flag_t attach_flags = (snap_action_flag_t) 0;
 
   snap_state.action_handle = snap_attach_action(snap_state.card_handle, snap_state.action_type, attach_flags, 100);
-  
+
   debug_print("[FLETCHER_SNAP] Action attached.\n");
 
   return FLETCHER_STATUS_OK;

@@ -18,7 +18,7 @@
 
 #include "fletcher/fletcher.h"
 
-#ifdef DEBUG
+#ifndef NDEBUG
 #define SIM
 #define ENABLE_DEBUG_PRINT 1
 #else
