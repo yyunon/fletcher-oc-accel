@@ -4,7 +4,8 @@ project(fletcher_snap VERSION 0.0.0 LANGUAGES C CXX)
 
 find_library(SNAP snap HINTS "$ENV{SNAP_ROOT}/software/lib")
 if(SNAP)
-  add_library(snap INTERFACE IMPORTED GLOBAL)
+  add_library(snap SHARED IMPORTED GLOBAL)
+  set_target_properties(snap PROPERTIES IMPORTED_LOCATION ${SNAP})
   target_include_directories(snap INTERFACE "$ENV{SNAP_ROOT}/software/include")
 else()
   message(FATAL_ERROR "Dependency snap not found")
@@ -18,9 +19,9 @@ FetchContent_Declare(cmake-modules
 )
 FetchContent_MakeAvailable(cmake-modules)
 
-add_subdirectory(../fletcher/common/c c)
-
 include(CompileUnits)
+
+add_subdirectory($ENV{FLETCHER_DIR}/common/c fletcher-c)
 
 add_compile_unit(
   NAME fletcher::snap
