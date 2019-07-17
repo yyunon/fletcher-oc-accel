@@ -19,6 +19,7 @@ jobs:
   steps:
   - checkout: self
     submodules: true
+  - template: steps/install-fletcher.yml@abs-tudelft
   - template: steps/install-snap.yml@abs-tudelft
     parameters:
       snapVersion: $(snapVersion)
