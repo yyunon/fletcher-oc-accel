@@ -23,7 +23,10 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 library work;
-use work.Utils.all;
+use work.Axi_pkg.all;
+use work.UtilInt_pkg.all;
+use work.UtilConv_pkg.all;
+use work.UtilMisc_pkg.all;
 
 entity action_fletcher is
     generic (
@@ -133,69 +136,6 @@ entity action_fletcher is
 end action_fletcher;
 
 architecture Behavorial of action_fletcher is
-
-  component axi_top is
-    generic (
-      BUS_ADDR_WIDTH              : natural;
-      BUS_DATA_WIDTH              : natural;
-      BUS_STROBE_WIDTH            : natural;
-      BUS_LEN_WIDTH               : natural;
-      BUS_BURST_MAX_LEN           : natural;
-      BUS_BURST_STEP_LEN          : natural;
-      SLV_BUS_ADDR_WIDTH          : natural;
-      SLV_BUS_DATA_WIDTH          : natural;
-      INDEX_WIDTH                 : natural;
-      TAG_WIDTH                   : natural;
-      NUM_ARROW_BUFFERS           : natural;
-      NUM_USER_REGS               : natural;
-      NUM_REGS                    : natural;
-      REG_WIDTH                   : natural
-    );
-    port (
-      acc_clk                     : in  std_logic;
-      acc_reset                   : in  std_logic;
-      bus_clk                     : in  std_logic;
-      bus_reset_n                 : in  std_logic;
-      m_axi_araddr                : out std_logic_vector(BUS_ADDR_WIDTH-1 downto 0);
-      m_axi_arlen                 : out std_logic_vector(7 downto 0);
-      m_axi_arvalid               : out std_logic;
-      m_axi_arready               : in  std_logic;
-      m_axi_arsize                : out std_logic_vector(2 downto 0);
-      m_axi_rdata                 : in  std_logic_vector(BUS_DATA_WIDTH-1 downto 0);
-      m_axi_rresp                 : in  std_logic_vector(1 downto 0);
-      m_axi_rlast                 : in  std_logic;
-      m_axi_rvalid                : in  std_logic;
-      m_axi_rready                : out std_logic;
-      m_axi_awvalid               : out std_logic;
-      m_axi_awready               : in  std_logic;
-      m_axi_awaddr                : out std_logic_vector(BUS_ADDR_WIDTH-1 downto 0);
-      m_axi_awlen                 : out std_logic_vector(7 downto 0);
-      m_axi_awsize                : out std_logic_vector(2 downto 0);
-      m_axi_wvalid                : out std_logic;
-      m_axi_wready                : in  std_logic;
-      m_axi_wdata                 : out std_logic_vector(BUS_DATA_WIDTH-1 downto 0);
-      m_axi_wlast                 : out std_logic;
-      m_axi_wstrb                 : out std_logic_vector(BUS_DATA_WIDTH/8-1 downto 0);
-      s_axi_awvalid               : in std_logic;
-      s_axi_awready               : out std_logic;
-      s_axi_awaddr                : in std_logic_vector(SLV_BUS_ADDR_WIDTH-1 downto 0);
-      s_axi_wvalid                : in std_logic;
-      s_axi_wready                : out std_logic;
-      s_axi_wdata                 : in std_logic_vector(SLV_BUS_DATA_WIDTH-1 downto 0);
-      s_axi_wstrb                 : in std_logic_vector((SLV_BUS_DATA_WIDTH/8)-1 downto 0);
-      s_axi_bvalid                : out std_logic;
-      s_axi_bready                : in std_logic;
-      s_axi_bresp                 : out std_logic_vector(1 downto 0);
-      s_axi_arvalid               : in std_logic;
-      s_axi_arready               : out std_logic;
-      s_axi_araddr                : in std_logic_vector(SLV_BUS_ADDR_WIDTH-1 downto 0);
-      s_axi_rvalid                : out std_logic;
-      s_axi_rready                : in std_logic;
-      s_axi_rdata                 : out std_logic_vector(SLV_BUS_DATA_WIDTH-1 downto 0);
-      s_axi_rresp                 : out std_logic_vector(1 downto 0)
-    );
-  end component;
-
   signal s_axi_host_mem_awaddr   : std_logic_vector(C_AXI_HOST_MEM_ADDR_WIDTH-1 downto 0);
   signal s_axi_host_mem_awlen    : std_logic_vector(7 downto 0);
   signal s_axi_host_mem_awsize   : std_logic_vector(2 downto 0);
@@ -265,7 +205,7 @@ architecture Behavorial of action_fletcher is
   type snap_regs_t is array (0 to SNAP_NUM_REGS-1) of std_logic_vector(C_AXI_CTRL_REG_DATA_WIDTH-1 downto 0);
   signal snap_regs                   : snap_regs_t := (others => (others => '0'));
 
-  signal fletcher_s_axi_awaddr    : std_logic_vector(8 downto 0);
+  signal fletcher_s_axi_awaddr    : std_logic_vector(31 downto 0);
   signal fletcher_s_axi_awvalid   : std_logic;
   signal fletcher_s_axi_awready   : std_logic;
   signal fletcher_s_axi_wdata     : std_logic_vector(C_AXI_CTRL_REG_DATA_WIDTH-1 downto 0);
@@ -277,7 +217,7 @@ architecture Behavorial of action_fletcher is
   signal fletcher_s_axi_bready    : std_logic;
   signal fletcher_s_axi_arvalid   : std_logic;
   signal fletcher_s_axi_arready   : std_logic;
-  signal fletcher_s_axi_araddr    : std_logic_vector(8 downto 0);
+  signal fletcher_s_axi_araddr    : std_logic_vector(31 downto 0);
   signal fletcher_s_axi_rvalid    : std_logic;
   signal fletcher_s_axi_rready    : std_logic;
   signal fletcher_s_axi_rdata     : std_logic_vector(C_AXI_CTRL_REG_DATA_WIDTH-1 downto 0);
@@ -367,15 +307,17 @@ begin
   fletcher_space_w                <= axi_ctrl_reg_araddr(9);
 
   -- Fletcher inputs
-  fletcher_s_axi_awaddr           <= axi_ctrl_reg_awaddr(8 downto 0);
-  fletcher_s_axi_awvalid          <= axi_ctrl_reg_awvalid and fletcher_space_w;
-  fletcher_s_axi_wdata            <= axi_ctrl_reg_wdata;
-  fletcher_s_axi_wstrb            <= axi_ctrl_reg_wstrb;
-  fletcher_s_axi_wvalid           <= axi_ctrl_reg_wvalid;
-  fletcher_s_axi_bready           <= axi_ctrl_reg_bready;
-  fletcher_s_axi_arvalid          <= axi_ctrl_reg_arvalid and fletcher_space_r;
-  fletcher_s_axi_araddr           <= axi_ctrl_reg_araddr(8 downto 0);
-  fletcher_s_axi_rready           <= axi_ctrl_reg_rready;
+  fletcher_s_axi_awaddr(31 downto 9) <= (others => '0');
+  fletcher_s_axi_awaddr(8 downto 0)  <= axi_ctrl_reg_awaddr(8 downto 0);
+  fletcher_s_axi_awvalid             <= axi_ctrl_reg_awvalid and fletcher_space_w;
+  fletcher_s_axi_wdata               <= axi_ctrl_reg_wdata;
+  fletcher_s_axi_wstrb               <= axi_ctrl_reg_wstrb;
+  fletcher_s_axi_wvalid              <= axi_ctrl_reg_wvalid;
+  fletcher_s_axi_bready              <= axi_ctrl_reg_bready;
+  fletcher_s_axi_arvalid             <= axi_ctrl_reg_arvalid and fletcher_space_r;
+  fletcher_s_axi_araddr(31 downto 9) <= (others => '0');
+  fletcher_s_axi_araddr(8 downto 0)  <= axi_ctrl_reg_araddr(8 downto 0);
+  fletcher_s_axi_rready              <= axi_ctrl_reg_rready;
 
   -- SNAP inputs
   snap_s_axi_awaddr             <= axi_ctrl_reg_awaddr(SNAP_ADDR_WIDTH-1 downto 0);
@@ -409,6 +351,10 @@ begin
   -- We just need to implement reads from REG_SNAP_TYPE and REG_SNAP_VERSION
   snap_regs(SNAP_REG_TYPE)      <= X"00000001";
   snap_regs(SNAP_REG_VERSION)   <= X"00000000";
+  
+  snap_regs(SNAP_REG_CONTROL)(1) <= '1'; -- dirty hack to always be done.
+  snap_regs(SNAP_REG_CONTROL)(2) <= '1'; -- dirty hack to always be idle.
+  snap_regs(SNAP_REG_CONTROL)(3) <= '1'; -- dirty hack to always be ready.
 
   -- Ready
   snap_s_axi_arready            <= not read_valid;
@@ -453,7 +399,9 @@ begin
       if write_valid = '1' then
         case address is
           when SNAP_REG_CONTEXT_ID       => snap_regs(SNAP_REG_CONTEXT_ID)       <= snap_s_axi_wdata;
-          when SNAP_REG_CONTROL          => snap_regs(SNAP_REG_CONTROL)          <= snap_s_axi_wdata;
+          when SNAP_REG_CONTROL          => snap_regs(SNAP_REG_CONTROL)(0)       <= snap_s_axi_wdata(0); -- start
+                                            snap_regs(SNAP_REG_CONTROL)(7)       <= snap_s_axi_wdata(7); -- auto restart
+                                            
           when SNAP_REG_INTERRUPT_ENABLE => snap_regs(SNAP_REG_INTERRUPT_ENABLE) <= snap_s_axi_wdata;
           when others                    => -- do nothing to read only regs
         end case;
@@ -513,7 +461,7 @@ begin
   ----------------------------------------------------------------------
   -- Fletcher top level
   ----------------------------------------------------------------------
-  fletcher_axi_top_inst : axi_top
+  fletcher_axi_top_inst : AxiTop
     generic map (
       BUS_ADDR_WIDTH            => 64,
       BUS_DATA_WIDTH            => 512,
@@ -521,20 +469,14 @@ begin
       BUS_LEN_WIDTH             => 8,
       BUS_BURST_MAX_LEN         => 64,
       BUS_BURST_STEP_LEN        => 1,
-      SLV_BUS_ADDR_WIDTH        => 9,
-      SLV_BUS_DATA_WIDTH        => 32,
-      INDEX_WIDTH               => 32,
-      TAG_WIDTH                 => 1,
-      NUM_ARROW_BUFFERS         => 2,
-      NUM_USER_REGS             => 4,
-      NUM_REGS                  => 14,
-      REG_WIDTH                 => 32
+      MMIO_ADDR_WIDTH           => 32,
+      MMIO_DATA_WIDTH           => 32
     )
     port map (
-      acc_clk                   => action_clk,
-      acc_reset                 => action_rst,
-      bus_clk                   => action_clk,
-      bus_reset_n               => action_rst_n,
+      kcd_clk                   => action_clk,
+      kcd_reset                 => action_rst,
+      bcd_clk                   => action_clk,
+      bcd_reset                 => action_rst,
 
       m_axi_araddr              => s_axi_host_mem_araddr,
       m_axi_arlen               => s_axi_host_mem_arlen,
