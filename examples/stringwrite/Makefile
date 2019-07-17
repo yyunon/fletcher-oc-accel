@@ -14,12 +14,22 @@
 # limitations under the License.
 #
 
-subdirs += sw hw
+# Make sure Fletcher environment variable is set.
+ifndef FLETCHER_DIR
+$(error FLETCHER_DIR is not set)
+endif
+
+subdirs += sw
 
 all: $(subdirs)
 
-# Only build if the subdirectory is existent and if Makefile is there
-.PHONY: $(subdirs)
+.PHONY: $(subdirs) hw
+
+hw:
+	echo "INFO: Creating Fletcher hardware symlinks."
+	ln -fs $(FLETCHER_DIR)/hardware hw/fletcher
+	ln -fs $(FLETCHER_DIR)/examples/stringwrite/hardware hw/stringwrite
+
 $(subdirs):
 	@if [ -d $@ -a -f $@/Makefile ]; then			\
 		$(MAKE) -C $@ || exit 1;			\

@@ -45,10 +45,6 @@
 #define ACTION_DEST_HIGH        0x40
 #define ACTION_CNT              0x44    /* Count Register or # of 512 Byte Blocks for NVME */
 
-/* No units */
-#define TOTAL_UNITS     16 // fix me
-#define ACTIVE_UNITS    8
-
 #define SNAP_OFFSET     0x200
 
 /* Registers */
@@ -58,12 +54,13 @@
 #define   CONTROL_RESET    4
 
 #define REG_STATUS    SNAP_OFFSET + 4*1
-#define   STATUS_BUSY      1
-#define   STATUS_DONE      2
-#define   STATUS_MASK      3
+#define   STATUS_IDLE      1
+#define   STATUS_BUSY      2
+#define   STATUS_DONE      4
+#define   STATUS_MASK      7
 
-#define REG_RETURN1      SNAP_OFFSET + 4*2
-#define REG_RETURN0      SNAP_OFFSET + 4*3
+#define REG_RETURN0      SNAP_OFFSET + 4*2
+#define REG_RETURN1      SNAP_OFFSET + 4*3
 #define REG_FIRST_IDX    SNAP_OFFSET + 4*4
 #define REG_LAST_IDX     SNAP_OFFSET + 4*5
 #define REG_OFF_ADDR_LO  SNAP_OFFSET + 4*6
