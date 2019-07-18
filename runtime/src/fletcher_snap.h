@@ -19,13 +19,12 @@
 #include "fletcher/fletcher.h"
 
 #ifndef NDEBUG
-#define SIM
 #define ENABLE_DEBUG_PRINT 1
 #else
 #define ENABLE_DEBUG_PRINT 0
 #endif
 
-#ifdef SIM
+#ifndef SNAP_NSIM
 #define SNAP_SIM 1
 #else
 #define SNAP_SIM 0
