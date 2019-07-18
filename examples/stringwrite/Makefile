@@ -27,8 +27,10 @@ all: $(subdirs)
 
 hw:
 	echo "INFO: Creating Fletcher hardware symlinks."
-	ln -fs $(FLETCHER_DIR)/hardware hw/fletcher
-	ln -fs $(FLETCHER_DIR)/examples/stringwrite/hardware hw/stringwrite
+	rm -f ./hw/fletcher
+	rm -f ./hw/stringwrite
+	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
+	ln -fs $(FLETCHER_DIR)/examples/stringwrite/hardware ./hw/sum
 
 $(subdirs):
 	@if [ -d $@ -a -f $@/Makefile ]; then			\
@@ -40,6 +42,8 @@ $(subdirs):
 # Cleanup for all subdirectories.
 # Only dive into subdirectory if existent and if Makefile is there.
 clean:
+	rm -f ./hw/fletcher
+	rm -f ./hw/stringwrite
 	@for dir in $(subdirs); do	\
 		if [ -d $$dir -a -f $$dir/Makefile ]; then	\
 			$(MAKE) -C $$dir $@ || exit 1;		\
