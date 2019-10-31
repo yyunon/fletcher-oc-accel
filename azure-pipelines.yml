@@ -1,0 +1,32 @@
+resources:
+  repositories:
+  - repository: abs-tudelft
+    type: github
+    endpoint: github
+    name: abs-tudelft/azure-pipelines-templates
+
+variables:
+  arrowVersion: 0.15.0
+  ocaccelVersion: master
+  ocseVersion: master
+
+jobs:
+
+- job: runtime
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - checkout: self
+    submodules: true
+  - template: steps/install-fletcher.yml@abs-tudelft
+  - template: steps/install-oc-accel.yml@abs-tudelft
+    parameters:
+      ocaccelVersion: $(ocaccelVersion)
+      ocseVersion: $(ocseVersion)
+  - template: steps/install-arrow.yml@abs-tudelft
+    parameters:
+      version: $(arrowVersion)
+  - template: steps/install-cmake.yml@abs-tudelft
+  - template: steps/cmake.yml@abs-tudelft
+    parameters:
+      source: runtime
