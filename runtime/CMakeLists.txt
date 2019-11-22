@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
+
 project(fletcher_snap VERSION 0.0.0 LANGUAGES C CXX)
 
 include(FetchContent)
@@ -7,6 +8,7 @@ FetchContent_Declare(cmake-modules
   GIT_TAG         master
 )
 FetchContent_MakeAvailable(cmake-modules)
+
 include(CompileUnits)
 
 # Attempt to find snap
@@ -19,11 +21,7 @@ else()
   message(FATAL_ERROR "SNAP not found. Please source snap_path.sh in the Snap repository...")
 endif()
 
-if(DEFINED ENV{FLETCHER_DIR})
-  add_subdirectory($ENV{FLETCHER_DIR}/common/c fletcher-c)
-else()
-  message(FATAL_ERROR "FLETCHER_DIR not defined. Please source env.sh in the Fletcher repository..." )
-endif()
+add_subdirectory(../fletcher/common/c c)
 
 option(SNAP_SIM "Build Snap run-time in simulation mode." ON)
 if (SNAP_SIM)
