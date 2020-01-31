@@ -30,7 +30,7 @@ hw:
 	rm -f ./hw/fletcher
 	rm -f ./hw/stringwrite
 	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
-	ln -fs $(FLETCHER_DIR)/examples/stringwrite/hardware ./hw/sum
+	ln -fs $(FLETCHER_DIR)/examples/stringwrite/hardware ./hw/stringwrite
 
 $(subdirs):
 	@if [ -d $@ -a -f $@/Makefile ]; then			\

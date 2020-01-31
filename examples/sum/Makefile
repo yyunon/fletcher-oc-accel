@@ -19,21 +19,36 @@ ifndef FLETCHER_DIR
 $(error FLETCHER_DIR is not set)
 endif
 
-all: hw sw
+subdirs += hw sw
 
-.PHONY: hw sw
+all: softlinks $(subdirs)
 
-hw:
+# Only build if the subdirectory is existent and if Makefile is there
+.PHONY: $(subdirs)
+$(subdirs):
+	@if [ -d $@ -a -f $@/Makefile ]; then			\
+		$(MAKE) -C $@ || exit 1;			\
+	else							\
+		echo "INFO: No Makefile available in $@ ...";	\
+	fi
+
+# Cleanup for all subdirectories.
+# Only dive into subdirectory if existent and if Makefile is there.
+clean:
+	rm -f ./hw/fletcher
+	rm -f ./hw/sum
+	@for dir in $(subdirs); do	\
+		if [ -d $$dir -a -f $$dir/Makefile ]; then	\
+			$(MAKE) -C $$dir $@ || exit 1;		\
+		fi						\
+	done
+	@find . -depth -name '*~'  -exec rm -rf '{}' \; -print
+	@find . -depth -name '.#*' -exec rm -rf '{}' \; -print
+
+softlinks:
 	echo "INFO: Creating Fletcher hardware symlinks."
 	rm -f ./hw/fletcher
 	rm -f ./hw/sum
 	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
 	ln -fs $(FLETCHER_DIR)/examples/sum/hardware ./hw/sum
 
-sw:
-	echo "INFO: Please compile application manually."
-
-clean:
-	echo "INFO: Removing Fletcher hardware symlinks."
-	rm ./hw/fletcher
-	rm ./hw/sum

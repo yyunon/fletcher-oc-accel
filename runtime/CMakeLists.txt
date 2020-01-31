@@ -12,7 +12,7 @@ FetchContent_MakeAvailable(cmake-modules)
 include(CompileUnits)
 
 # Attempt to find snap
-find_library(SNAP snap HINTS "$ENV{SNAP_ROOT}/software/lib")
+find_library(SNAP osnap HINTS "$ENV{SNAP_ROOT}/software/lib")
 if(SNAP)
   add_library(snap SHARED IMPORTED GLOBAL)
   set_target_properties(snap PROPERTIES IMPORTED_LOCATION ${SNAP})

@@ -16,9 +16,9 @@
 #include <memory.h>
 #include <malloc.h>
 
-#include <libsnap.h>
-#include <snap_tools.h>
-#include <snap_s_regs.h>
+#include <libosnap.h>
+#include <osnap_tools.h>
+#include <osnap_global_regs.h>
 
 #include "fletcher/fletcher.h"
 #include "fletcher_snap.h"
@@ -42,15 +42,18 @@ fstatus_t platformInit(void *arg) {
 
   if (snap_state.sim) {
     debug_print("[FLETCHER_SNAP] Simulation mode.\n");
-    if (access("pslse_server.dat", F_OK) == -1) {
-      debug_print("[FLETCHER_SNAP] No pslse_server.dat file present in working directory. Entering error state.\n");
+    if (access("ocse_server.dat", F_OK) == -1) {
+      debug_print("[FLETCHER_SNAP] No ocse_server.dat file present in working directory. Entering error state.\n");
       snap_state.error = 1;
       return FLETCHER_STATUS_ERROR;
     }
-    debug_print("[FLETCHER_SNAP] pslse_server.dat present.\n");
+    debug_print("[FLETCHER_SNAP] ocse_server.dat present.\n");
   }
 
-  sprintf(snap_state.device, "/dev/cxl/afu%d.0s", snap_state.card_no);
+  if(snap_state.card_no == 0)
+          snprintf(snap_state.device, sizeof(snap_state.device)-1, "IBM,oc-snap");
+  else
+          snprintf(snap_state.device, sizeof(snap_state.device)-1, "/dev/ocxl/IBM,oc-snap.000%d:00:00.1.0", snap_state.card_no);
 
   snap_state.card_handle = snap_card_alloc_dev(snap_state.device, SNAP_VENDOR_ID_IBM, SNAP_DEVICE_ID_SNAP);
 
@@ -72,7 +75,7 @@ fstatus_t platformInit(void *arg) {
       break;
     case 16:debug_print("N250SP\n");
       break;
-    default:debug_print("Other / Unkown\n");
+    default:debug_print("Other / Unkown (id: %d)\n", ioctl_data);
       break;
   }
 
@@ -83,13 +86,19 @@ fstatus_t platformInit(void *arg) {
 
   snap_state.action_handle = snap_attach_action(snap_state.card_handle, snap_state.action_type, attach_flags, 100);
 
+  if (snap_state.action_handle == NULL) {
+	  debug_print("[FLETCHER_SNAP] Could not attach action. Entering error state.");
+	      snap_state.error = 1;
+	      return FLETCHER_STATUS_ERROR;
+  }
+
   debug_print("[FLETCHER_SNAP] Action attached.\n");
 
   return FLETCHER_STATUS_OK;
 }
 
 fstatus_t platformWriteMMIO(uint64_t offset, uint32_t value) {
-  snap_mmio_write32(snap_state.card_handle, FLETCHER_SNAP_ACTION_REG_OFFSET + 4*offset, value);
+  snap_action_write32(snap_state.card_handle, FLETCHER_SNAP_ACTION_REG_OFFSET + 4*offset, value);
   debug_print("[FLETCHER_SNAP] Writing MMIO register.       %04lu <= 0x%08X\n", offset, value);
   return FLETCHER_STATUS_OK;
 }
@@ -100,7 +109,7 @@ fstatus_t platformReadMMIO(uint64_t offset, uint32_t *value) {
   if (snap_state.sim && offset == FLETCHER_REG_STATUS) {
     sleep(2);
   }
-  snap_mmio_read32(snap_state.card_handle, FLETCHER_SNAP_ACTION_REG_OFFSET + 4*offset, value);
+  snap_action_read32(snap_state.card_handle, FLETCHER_SNAP_ACTION_REG_OFFSET + 4*offset, value);
   debug_print("[FLETCHER_SNAP] Reading MMIO register.       %04lu => 0x%08X\n", offset, *value);
   return FLETCHER_STATUS_OK;
 }
