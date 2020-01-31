@@ -14,7 +14,7 @@
 
 #include <unistd.h>
 
-#include "libsnap.h"
+#include "libosnap.h"
 
 #include "fletcher/fletcher.h"
 

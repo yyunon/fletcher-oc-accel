@@ -21,7 +21,7 @@
  * This makes it obvious that we are influenced by HLS details ...
  * The ACTION control bits are defined in the following file.
  */
-#include <snap_hls_if.h>
+#include <osnap_hls_if.h>
 
 /* Header file for SNAP Framework example code */
 #define ACTION_TYPE_EXAMPLE     0x00000001	/* Action Type */
