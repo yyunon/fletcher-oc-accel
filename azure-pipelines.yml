@@ -31,7 +31,7 @@ jobs:
     parameters:
       source: runtime
 
-- job: sum-sw
+- job: sum_sw
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -50,7 +50,7 @@ jobs:
       make -C examples/sum
     displayName: Build
 
-- job: stringwrite-sw
+- job: stringwrite_sw
   pool:
     vmImage: ubuntu-latest
   steps:
