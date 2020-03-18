@@ -6,9 +6,9 @@ resources:
     name: abs-tudelft/azure-pipelines-templates
 
 variables:
-  snapVersion: 1.5.1
-  pslseVersion: 4.1
-  pslVersion: 8
+  arrowVersion: 0.16.0
+  ocaccelVersion: master
+  ocseVersion: master
 
 jobs:
 
@@ -18,12 +18,58 @@ jobs:
   steps:
   - checkout: self
     submodules: true
-  - template: steps/install-snap.yml@abs-tudelft
+  - template: steps/install-fletcher.yml@abs-tudelft
+  - template: steps/install-oc-accel.yml@abs-tudelft
     parameters:
-      snapVersion: $(snapVersion)
-      pslseVersion: $(pslseVersion)
-      pslVersion: $(pslVersion)
+      ocaccelVersion: $(ocaccelVersion)
+      ocseVersion: $(ocseVersion)
+  - template: steps/install-arrow.yml@abs-tudelft
+    parameters:
+      version: $(arrowVersion)
   - template: steps/install-cmake.yml@abs-tudelft
   - template: steps/cmake.yml@abs-tudelft
     parameters:
       source: runtime
+
+- job: sum-sw
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - checkout: self
+    submodules: true
+  - template: steps/install-fletcher.yml@abs-tudelft
+  - template: steps/install-oc-accel.yml@abs-tudelft
+    parameters:
+      ocaccelVersion: $(ocaccelVersion)
+      ocseVersion: $(ocseVersion)
+  - template: steps/install-arrow.yml@abs-tudelft
+    parameters:
+      version: $(arrowVersion)
+  - template: steps/install-cmake.yml@abs-tudelft
+  - script: |
+      make
+    displayName: Build
+    parameters: 
+      source: examples/sum
+
+- job: stringwrite-sw
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - checkout: self
+    submodules: true
+  - template: steps/install-fletcher.yml@abs-tudelft
+  - template: steps/install-oc-accel.yml@abs-tudelft
+    parameters:
+      ocaccelVersion: $(ocaccelVersion)
+      ocseVersion: $(ocseVersion)
+  - template: steps/install-arrow.yml@abs-tudelft
+    parameters:
+      version: $(arrowVersion)
+  - template: steps/install-cmake.yml@abs-tudelft
+  - script: |
+      make
+    displayName: Build
+    parameters: 
+      source: examples/stringwrite
+
