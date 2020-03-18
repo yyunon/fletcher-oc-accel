@@ -47,10 +47,8 @@ jobs:
       version: $(arrowVersion)
   - template: steps/install-cmake.yml@abs-tudelft
   - script: |
-      make
+      make -C examples/sum
     displayName: Build
-    parameters: 
-      source: examples/sum
 
 - job: stringwrite-sw
   pool:
@@ -68,8 +66,5 @@ jobs:
       version: $(arrowVersion)
   - template: steps/install-cmake.yml@abs-tudelft
   - script: |
-      make
+      make -C examples/stringwrite
     displayName: Build
-    parameters: 
-      source: examples/stringwrite
-
