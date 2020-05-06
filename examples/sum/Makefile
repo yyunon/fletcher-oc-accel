@@ -19,12 +19,19 @@ ifndef FLETCHER_DIR
 $(error FLETCHER_DIR is not set)
 endif
 
-subdirs += hw sw
+subdirs += sw
 
-all: softlinks $(subdirs)
+all: $(subdirs)
 
-# Only build if the subdirectory is existent and if Makefile is there
-.PHONY: $(subdirs)
+.PHONY: $(subdirs) hw
+
+hw:
+	echo "INFO: Creating Fletcher hardware symlinks."
+	rm -f ./hw/fletcher
+	rm -f ./hw/sum
+	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
+	ln -fs $(FLETCHER_DIR)/examples/sum/hardware ./hw/sum
+
 $(subdirs):
 	@if [ -d $@ -a -f $@/Makefile ]; then			\
 		$(MAKE) -C $@ || exit 1;			\
@@ -44,11 +51,4 @@ clean:
 	done
 	@find . -depth -name '*~'  -exec rm -rf '{}' \; -print
 	@find . -depth -name '.#*' -exec rm -rf '{}' \; -print
-
-softlinks:
-	echo "INFO: Creating Fletcher hardware symlinks."
-	rm -f ./hw/fletcher
-	rm -f ./hw/sum
-	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
-	ln -fs $(FLETCHER_DIR)/examples/sum/hardware ./hw/sum
 
