@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#	 http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,15 @@ vhd_files=$(vhd_srcs:.vhd_source=.vhd)
 
 .PHONY: all config clean vhdl
 
-all: config
+all: config softlinks
+
+
+softlinks:
+	echo "INFO: Creating Fletcher hardware symlinks."
+	rm -f ./fletcher
+	rm -f ./sum
+	ln -fs $(FLETCHER_DIR)/hardware ./fletcher
+	ln -fs $(FLETCHER_DIR)/examples/sum/hardware ./sum
 
 config:
 	$(info Call action_config.sh)
@@ -27,12 +35,14 @@ config:
 
 clean:
 	@$(RM) $(vhd_files)
+	rm -f ./fletcher
+	rm -f ./sum
 
 vhdl:
 
 #
 # FIXME Consider moving the functionality from action_config.sh into
-#      this Makefile. This also allows to define a proper clean rule
-#      such that the directory gets properly cleaned up and git status
-#      shows not the generated files.
+#	  this Makefile. This also allows to define a proper clean rule
+#	  such that the directory gets properly cleaned up and git status
+#	  shows not the generated files.
 #

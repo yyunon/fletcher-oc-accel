@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#	 http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,18 +19,11 @@ ifndef FLETCHER_DIR
 $(error FLETCHER_DIR is not set)
 endif
 
-subdirs += sw
+subdirs += hw
 
 all: $(subdirs)
 
-.PHONY: $(subdirs) hw
-
-hw:
-	echo "INFO: Creating Fletcher hardware symlinks."
-	rm -f ./hw/fletcher
-	rm -f ./hw/sum
-	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
-	ln -fs $(FLETCHER_DIR)/examples/sum/hardware ./hw/sum
+.PHONY: $(subdirs)
 
 $(subdirs):
 	@if [ -d $@ -a -f $@/Makefile ]; then			\
@@ -42,8 +35,6 @@ $(subdirs):
 # Cleanup for all subdirectories.
 # Only dive into subdirectory if existent and if Makefile is there.
 clean:
-	rm -f ./hw/fletcher
-	rm -f ./hw/sum
 	@for dir in $(subdirs); do	\
 		if [ -d $$dir -a -f $$dir/Makefile ]; then	\
 			$(MAKE) -C $$dir $@ || exit 1;		\
