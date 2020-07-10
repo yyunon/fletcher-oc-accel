@@ -300,6 +300,9 @@ begin
   s_axi_host_mem_rid      <= axi_host_mem_rid;
   s_axi_host_mem_ruser    <= axi_host_mem_ruser;
 
+  -- Signal our AXI master is always ready for a write response
+  s_axi_host_mem_bready <= '1';
+
   ----------------------------------------------------------------------
   -- AXI Lite Slave inputs
   ----------------------------------------------------------------------
