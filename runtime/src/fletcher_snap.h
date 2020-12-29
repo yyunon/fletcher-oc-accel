@@ -57,6 +57,9 @@ typedef struct {
 
 } PlatformState;
 
+#define is_aligned(POINTER, BYTE_COUNT) \
+    (((uintptr_t)(const void *)(POINTER)) % (BYTE_COUNT) == 0)
+
 PlatformState snap_state ={NULL, NULL, 0, 0x1, SNAP_SIM, 0, 4096, {0}};
 
 /// @brief Store the platform name in a buffer of size /p size pointed to by /p name.

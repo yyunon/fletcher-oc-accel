@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -shared -Wl,-soname,libfletcher_snap.so -o libfletcher_snap.so CMakeFiles/fletcher_snap.dir/src/fletcher_snap.c.o  -Wl,-rpath,/home/yyunon/thesis_journals/resources/oc-accel/software/lib: /home/yyunon/thesis_journals/resources/oc-accel/software/lib/libosnap.so 

@@ -1,0 +1,2 @@
+/usr/local/include/fletcher/fletcher.h
+/usr/local/lib/libfletcher_snap.so

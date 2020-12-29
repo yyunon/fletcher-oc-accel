@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <memory.h>
+#include <stdlib.h>
 #include <malloc.h>
 
 #include <libosnap.h>
@@ -155,7 +156,25 @@ fstatus_t platformDeviceFree(da_t device_address) {
 }
 
 fstatus_t platformPrepareHostBuffer(const uint8_t *host_source, da_t *device_destination, int64_t size, int *alloced) {
-  *device_destination = (da_t) host_source;
+  
+  if (is_aligned(host_source, 128)) {
+    //If the buffer is aligned, just pass the address.
+    *device_destination = (da_t) host_source;
+    debug_print("[FLETCHER_SNAP] Preparing (aligned) buffer for device. [host] 0x%016lX --> 0x%016lX (%10lu bytes).\n",
+              (unsigned long) host_source,
+              (unsigned long) *device_destination,
+              size);
+  } else {
+    //If the buffer is misaligned, it has to be fixed.
+    uint8_t *aligned_buffer = aligned_alloc(64, size*sizeof(uint8_t));
+    memcpy(aligned_buffer, host_source, size*sizeof(uint8_t));
+    *device_destination = (da_t) aligned_buffer;
+    debug_print("[FLETCHER_SNAP] Preparing (misaligned) buffer for device. [host] 0x%016lX --> 0x%016lX (%10lu bytes).\n",
+              (unsigned long) host_source,
+              (unsigned long) *device_destination,
+              size);
+  }
+
   *alloced = 0;
   debug_print("[FLETCHER_SNAP] Preparing buffer for device. [host] 0x%016lX --> 0x%016lX (%10lu bytes).\n",
               (unsigned long) host_source,
